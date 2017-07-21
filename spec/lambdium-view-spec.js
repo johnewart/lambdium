@@ -1,6 +1,6 @@
 'use babel';
 
-import LambdiumView from '../lib/lambdium-view';
+import LambdiumCoffeeView from '../lib/lambdium-view';
 
 describe('LambdiumView', () => {
   it('has one valid test', () => {
