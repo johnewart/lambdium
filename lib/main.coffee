@@ -5,6 +5,7 @@ LambdiumPane = require './views/lambdium-pane'
 
 
 module.exports =
+
   activate: (state) ->
     @subscriptions = new CompositeDisposable()
     @lamdiumPanes = []
@@ -25,6 +26,8 @@ module.exports =
     @add true
 
   add: (isInitial) ->
+    console.log("Hey-yo!")
+
     if @bottomDock
       newPane = new LambdiumPane()
       @lamdiumPanes.push newPane
@@ -39,3 +42,13 @@ module.exports =
   deactivate: ->
     @subscriptions.dispose()
     @bottomDock.deletePane pane.getId() for pane in @lamdiumPanes
+
+
+  config: {
+    pathToSAMBinary: {
+      type: 'string',
+      default: 'sam',
+      order: 1,
+      title: "Path to SAM binary"
+    },
+  };

@@ -17,6 +17,7 @@ class OutputView extends View
     @emitter = new Emitter()
     @converter = new Converter fg: $('<span>').css('color')
     @subscriptions = new CompositeDisposable()
+    @samEnabled = false
 
 
   setupTaskList: (tasks) ->
@@ -48,14 +49,19 @@ class OutputView extends View
         @runTask task
       @taskList.append listItem
 
+  toggleSam: (samEnabled) ->
+    @samEnabled = samEnabled
+    if samEnabled
+      @writeOutput "Using SAM for local execution", 'text-info'
+    else
+      @writeOutput "Running tests in Lambda", 'text-info'
 
-  setupLambdaTaskRunner: (func, project, projectRoot) ->
-    @LambdaTaskRunner = new LambdaTaskRunner func, project, projectRoot
+
+  setupLambdaTaskRunner: (func, project) ->
+    @LambdaTaskRunner = new LambdaTaskRunner func, project
 
   runTask: (task) ->
-    @LambdaTaskRunner.run(task, @onOutput, @onError, @onSuccess)
-
-
+    @LambdaTaskRunner.run(task, @samEnabled, @onOutput, @onError, @onSuccess)
 
   chunkSubstr: (str, size) ->
     numChunks = Math.ceil(str.length / size)

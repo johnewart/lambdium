@@ -26,6 +26,7 @@ class LambdiumPaneView extends DockPaneView
     @subscriptions.add @controlsView.onDidClickRefresh @refresh
     @subscriptions.add @controlsView.onDidClickStop @stop
     @subscriptions.add @controlsView.onDidClickClear @clear
+    @subscriptions.add @controlsView.onSamToggled @toggleSam
 
     @getConfigFiles()
 
@@ -37,6 +38,10 @@ class LambdiumPaneView extends DockPaneView
         path: filePath
         relativePath: FileFinderUtil.getRelativePath filePath
     @controlsView.updateConfigFiles configfiles
+
+  toggleSam: (event) =>
+    samEnabled = event.state
+    @outputView.toggleSam samEnabled
 
   updateTargets: (targetEvent) =>
     func = targetEvent.function

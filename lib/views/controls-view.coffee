@@ -11,6 +11,8 @@ class ControlsView extends DockPaneView
       @span outlet: 'refreshButton', class: 'refresh-button icon icon-sync', click: 'onRefreshClicked'
       @span outlet: 'clearButton', class: 'clear-button icon icon-history', click: 'onClearClicked'
       @select outlet: 'functionSelector'
+      @input type: 'checkbox', outlet: 'samEnabled', style: 'margin-left: 10px; margin-right: 5px'
+      @span class: 'label', 'Run locally using SAM'
 
   initialize: ->
     super()
@@ -18,6 +20,7 @@ class ControlsView extends DockPaneView
     @subscriptions = new CompositeDisposable()
 
     @functionSelector.change(@onFunctionSelected)
+    @samEnabled.change(@onSamChanged)
 
     @setupTooltips()
 
@@ -65,6 +68,9 @@ class ControlsView extends DockPaneView
   onDidClickClear: (callback) ->
     @emitter.on 'button:clear:clicked', callback
 
+  onSamToggled: (callback) ->
+    @emitter.on 'sam:toggled', callback
+
   onDidSelectFunction: (callback) ->
     @emitter.on 'function:selected', callback
 
@@ -82,5 +88,9 @@ class ControlsView extends DockPaneView
     project = @projects[e.target.value]
     @emitter.emit 'function:selected', { function: func, project: project }
 
+  onSamChanged: (e) =>
+    samEnabled = e.target.checked
+    console.log("SAM Enabled: #{samEnabled}")
+    @emitter.emit 'sam:toggled', { state: samEnabled }
 
 module.exports = ControlsView

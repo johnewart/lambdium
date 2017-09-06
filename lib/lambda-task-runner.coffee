@@ -18,7 +18,7 @@ class LambdaTaskRunner
     AWS.config.region = project.region
     @lambda = new AWS.Lambda()
 
-  run: (task, onOutput, onError, onSuccess) ->
+  run: (task, samEnabled, onOutput, onError, onSuccess) ->
     @log = onOutput
     @error = onError
     @success = onSuccess
@@ -26,7 +26,10 @@ class LambdaTaskRunner
     if task.action == 'deploy'
       @uploadCode()
     if task.action == 'invoke'
-      @invoke(task.data)
+      if samEnabled
+        @invokeLocally(task.data, onOutput, onError)
+      else
+        @invoke(task.data)
 
   uploadCode: ->
     @log("Upload function code!")
@@ -79,9 +82,30 @@ class LambdaTaskRunner
             console.log(data)
 
 
+  invokeLocally: (datafile, stdout, stderr) ->
+    @log "Invoking SAM with #{@function.name} with data file #{datafile} in #{@project.root}"
+    @process?.kill()
+    @process = null
+
+    executable = atom.config.get('lambdium.pathToSAMBinary')
+    args = ['local', 'invoke', '-p', '-e', datafile, @function.name]
+
+    @log "Running: #{executable} #{args.join ' '}"
+    process.env.PATH = switch process.platform
+      when 'win32' then process.env.PATH
+      else "#{process.env.PATH}:/usr/local/bin"
+
+    @process = new BufferedProcess
+      command: executable
+      args: args
+      options:
+        env: process.env
+        cwd: @project.root
+      stdout: stdout
+      stderr: stderr
 
   invoke: (datafile) ->
-    @log "Invoking #{@function.name} with data file #{datafile}...")
+    @log "Invoking #{@function.name} with data file #{datafile}..."
     filePath = path.join(@project.root, datafile);
     data = fs.readFileSync(filePath, {encoding: 'utf8'});
 
